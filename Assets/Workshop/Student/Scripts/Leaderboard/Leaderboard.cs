@@ -11,9 +11,9 @@ namespace Searching
         private List<PlayerScore> scores = new List<PlayerScore>();
         public GameObject UIScore;
         public Transform UiParent;
+
         void Awake()
         {
-            // Add 20 initial scores in unsorted order
             RecordScore(new PlayerScore("Alice", 100));
             RecordScore(new PlayerScore("Bob", 50));
             RecordScore(new PlayerScore("Charlie", 75));
@@ -29,12 +29,11 @@ namespace Searching
             RecordScore(new PlayerScore("Kevin", 275));
             RecordScore(new PlayerScore("Nina", 350));
             RecordScore(new PlayerScore("Mona", 325));
-
         }
 
         public void RecordScore(PlayerScore score)
         {
-            // [1] sequential search if the player is already in the list
+            // [1] Sequential search หาผู้เล่นเดิมเพื่อลบออก
             int index = -1;
             for (int i = 0; i < scores.Count; i++)
             {
@@ -50,7 +49,7 @@ namespace Searching
                 scores.RemoveAt(index);
             }
 
-            // [2] find index to insert that make the scores list sorted with binary search
+            // [2] Binary search หาตำแหน่งแทรกแบบเรียงลำดับมากไปน้อย
             index = -1;
             int left = 0;
             int right = scores.Count - 1;
@@ -65,17 +64,14 @@ namespace Searching
                 }
                 else if (scores[mid].score < score.score)
                 {
-
-                    left = mid + 1;
+                    right = mid - 1;
                 }
                 else
                 {
-
-                    right = mid - 1;
+                    left = mid + 1;
                 }
             }
 
-            // [3] If the score is not found, insert it at the appropriate index
             if (index == -1)
             {
                 index = left;
@@ -86,11 +82,10 @@ namespace Searching
 
         public void PrintScores()
         {
-            // join all score as string and print it
             string allScores = scores.Aggregate("", (acc, score) => acc + score.score.ToString() + ",");
             Debug.Log(allScores);
-
         }
+
         public void ShowleaderBoard()
         {
             foreach (var score in scores)
@@ -99,5 +94,119 @@ namespace Searching
                 uIScore.SetUpTextScore(score);
             }
         }
+
+        #region Searching Assignment Methods
+
+        public int LCT01_SequentialSearch1DArray()
+        {
+            int[] array = { 34, 21, 56, 12, 78, 90, 11, 23 };
+            int target = 90;
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] == target) return i;
+            }
+            return -1;
+        }
+
+        public int[] LCT02_SequentialSearch2DArray()
+        {
+            int[,] array = { { 34, 21, 56 }, { 12, 78, 90 }, { 11, 23, 45 } };
+            int target = 23;
+
+            int rows = array.GetLength(0);
+            int cols = array.GetLength(1);
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    if (array[r, c] == target) return new int[] { r, c };
+                }
+            }
+            return new int[] { -1, -1 };
+        }
+
+        public int LCT03_BinarySearch()
+        {
+            int[] array = { 11, 12, 21, 23, 34, 45, 56, 78, 90 };
+            int target = 23;
+
+            int left = 0;
+            int right = array.Length - 1;
+
+            while (left <= right)
+            {
+                int mid = left + (right - left) / 2;
+                if (array[mid] == target) return mid;
+                if (array[mid] < target) left = mid + 1;
+                else right = mid - 1;
+            }
+            return -1;
+        }
+
+        public int[] AS01_FindFirstAndLastElementOfArray(int[] array, int target)
+        {
+            int first = -1, last = -1;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] == target)
+                {
+                    if (first == -1) first = i;
+                    last = i;
+                }
+            }
+            if (first == -1) return new int[] { -1 };
+            return new int[] { first, last };
+        }
+
+        public int AS02_FindMaxLessThan(int[] array, int target)
+        {
+            int maxVal = int.MinValue;
+            bool found = false;
+            foreach (int val in array)
+            {
+                if (val < target)
+                {
+                    if (!found || val > maxVal)
+                    {
+                        maxVal = val;
+                        found = true;
+                    }
+                }
+            }
+            return found ? maxVal : -1;
+        }
+
+        public int[] AS03_FindRange(int[] array, int min, int max)
+        {
+            if (min > max) return new int[0];
+            List<int> result = new List<int>();
+            foreach (int val in array)
+            {
+                if (val >= min && val <= max) result.Add(val);
+            }
+            return result.ToArray();
+        }
+
+        public int[] EX01_FindTargetEnemies(int[] enemyHPs, int mana)
+        {
+            int[] sortedHPs = (int[])enemyHPs.Clone();
+            Array.Sort(sortedHPs);
+            List<int> selectedEnemies = new List<int>();
+            int currentManaUsed = 0;
+            foreach (int hp in sortedHPs)
+            {
+                if (currentManaUsed + hp <= mana)
+                {
+                    selectedEnemies.Add(hp);
+                    currentManaUsed += hp;
+                }
+                else break;
+            }
+            return selectedEnemies.ToArray();
+        }
+
+        #endregion
     }
 }
